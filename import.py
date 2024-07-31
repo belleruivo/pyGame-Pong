@@ -78,7 +78,7 @@ class Bola:
         self.velocidade_y = 0
         self.velocidade_x *= -1
 
-def desenhar(tela, raquetes, bola, pontuacao_esquerda, pontuacao_direita, mensagem_reiniciar=None):
+def desenhar(tela, raquetes, bola, pontuacao_esquerda, pontuacao_direita, mensagem_reiniciar=None, mensagem_vitoria=None):
     tela.fill(PRETO)
 
     # cria a pontuação dos jogadores e a exibe na tela
@@ -107,13 +107,17 @@ def desenhar(tela, raquetes, bola, pontuacao_esquerda, pontuacao_direita, mensag
     tela.blit(texto_jogador1, (LARGURA // 4 - retangulo_jogador1.width // 2, 10))  # Distância ajustada
     tela.blit(texto_jogador2, (LARGURA * (3 / 4) - retangulo_jogador2.width // 2, 10))  # Distância ajustada
 
-    if mensagem_reiniciar:
-        texto_reiniciar, retangulo_reiniciar = FONTE_REINICIO.render(mensagem_reiniciar, BRANCO)
-        fundo_mensagem = pygame.Surface(retangulo_reiniciar.size)
+    if mensagem_vitoria:
+        texto_vitoria, retangulo_vitoria = FONTE_VITORIA.render(mensagem_vitoria, BRANCO)
+        fundo_mensagem = pygame.Surface(retangulo_vitoria.size)
         fundo_mensagem.fill(VERDE)
         fundo_mensagem.set_alpha(200)  # Define a transparência do fundo
-        tela.blit(fundo_mensagem, (LARGURA // 2 - retangulo_reiniciar.width // 2, ALTURA // 2 - retangulo_reiniciar.height // 2))
-        tela.blit(texto_reiniciar, (LARGURA // 2 - retangulo_reiniciar.width // 2, ALTURA // 2 - retangulo_reiniciar.height // 2))
+        tela.blit(fundo_mensagem, (LARGURA // 2 - retangulo_vitoria.width // 2, ALTURA // 2 - retangulo_vitoria.height // 2 - 50))
+        tela.blit(texto_vitoria, (LARGURA // 2 - retangulo_vitoria.width // 2, ALTURA // 2 - retangulo_vitoria.height // 2 - 50))
+
+    if mensagem_reiniciar:
+        texto_reiniciar, retangulo_reiniciar = FONTE_REINICIO.render(mensagem_reiniciar, BRANCO)
+        tela.blit(texto_reiniciar, (LARGURA // 2 - retangulo_reiniciar.width // 2, ALTURA // 2 - retangulo_reiniciar.height // 2 + 50))
 
     pygame.display.update()
 
@@ -157,9 +161,6 @@ def tratar_movimento_raquetes(teclas, raquete_esquerda, raquete_direita):
         raquete_direita.mover(cima=False)
 
 def main():
-    rodando = True
-    relogio = pygame.time.Clock()
-
     raquete_esquerda = Raquete(10, ALTURA // 2 - ALTURA_RAQUETE // 2, LARGURA_RAQUETE, ALTURA_RAQUETE)
     raquete_direita = Raquete(LARGURA - 10 - LARGURA_RAQUETE, ALTURA // 2 - ALTURA_RAQUETE // 2, LARGURA_RAQUETE, ALTURA_RAQUETE)
     bola = Bola(LARGURA // 2, ALTURA // 2, RAIO_BOLA)
@@ -167,14 +168,38 @@ def main():
     pontuacao_esquerda = 0
     pontuacao_direita = 0
 
+    clock = pygame.time.Clock()
+    rodando = True
+    jogo_terminado = False
+    vencedor = None
+
     while rodando:
-        relogio.tick(FPS)
-        desenhar(TELA, [raquete_esquerda, raquete_direita], bola, pontuacao_esquerda, pontuacao_direita)
+        clock.tick(FPS)
+        mensagem_reiniciar = None
+        mensagem_vitoria = None
+        if jogo_terminado:
+            mensagem_reiniciar = "TECLE ENTER PARA JOGAR NOVAMENTE"
+            if vencedor:
+                mensagem_vitoria = f"{vencedor} VENCEU!"
+        desenhar(TELA, [raquete_esquerda, raquete_direita], bola, pontuacao_esquerda, pontuacao_direita, mensagem_reiniciar, mensagem_vitoria)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
                 break
+
+            if jogo_terminado:
+                if evento.type == pygame.KEYDOWN and evento.key == pygame.K_RETURN:
+                    bola.resetar()
+                    raquete_esquerda.resetar()
+                    raquete_direita.resetar()
+                    pontuacao_esquerda = 0
+                    pontuacao_direita = 0
+                    jogo_terminado = False
+                    vencedor = None
+
+        if jogo_terminado:
+            continue
 
         teclas = pygame.key.get_pressed()
         tratar_movimento_raquetes(teclas, raquete_esquerda, raquete_direita)
@@ -189,37 +214,12 @@ def main():
             pontuacao_esquerda += 1
             bola.resetar()
 
-        venceu = False
         if pontuacao_esquerda >= PONTUACAO_VITORIA:
-            venceu = True
-            texto_vitoria = "Player 1 Venceu!"
+            jogo_terminado = True
+            vencedor = "PLAYER 1"
         elif pontuacao_direita >= PONTUACAO_VITORIA:
-            venceu = True
-            texto_vitoria = "Player 2 Venceu!"
-
-        if venceu:
-            mensagem_reiniciar = "Pressione ENTER para jogar novamente"
-            desenhar(TELA, [raquete_esquerda, raquete_direita], bola, pontuacao_esquerda, pontuacao_direita, mensagem_reiniciar)
-            pygame.display.update()
-
-            aguardando_reiniciar = True
-            while aguardando_reiniciar:
-                for evento in pygame.event.get():
-                    if evento.type == pygame.QUIT:
-                        pygame.quit()
-                        return
-                    if evento.type == pygame.KEYDOWN:
-                        if evento.key == pygame.K_RETURN:
-                            # Reinicia o jogo
-                            raquete_esquerda.resetar()
-                            raquete_direita.resetar()
-                            bola.resetar()
-                            pontuacao_esquerda = 0
-                            pontuacao_direita = 0
-                            aguardando_reiniciar = False
-                        elif evento.key == pygame.K_ESCAPE:
-                            pygame.quit()
-                            return
+            jogo_terminado = True
+            vencedor = "PLAYER 2"
 
     pygame.quit()
 
