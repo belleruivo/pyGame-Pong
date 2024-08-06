@@ -147,78 +147,115 @@ def tratar_colisao(bola, raquete_esquerda, raquete_direita):
                 fator_reducao = (raquete_direita.altura / 2) / bola.VELOCIDADE_MAX
                 bola.velocidade_y = -diferenca_meio / fator_reducao
 
+def escolher_nivel(tela):
+    # configura a fonte para o menu
+    FONTE_MENU = pygame.freetype.SysFont("freesansbold", 40)
+
+    nivel = None
+    while nivel is None:
+        tela.fill(PRETO)  # limpa a tela
+
+        # desenha o texto do menu
+        texto_menu, retangulo_menu = FONTE_MENU.render("Escolha o Nível: 1 - Básico, 2 - Intermediário, 3 - Avançado", BRANCO)
+        tela.blit(texto_menu, (LARGURA // 2 - retangulo_menu.width // 2, ALTURA // 2 - retangulo_menu.height // 2))
+
+        pygame.display.update()  # atualiza a tela
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_1:
+                    nivel = "básico"
+                elif evento.key == pygame.K_2:
+                    nivel = "intermediário"
+                elif evento.key == pygame.K_3:
+                    nivel = "avançado"
+
+    return nivel
+
 def main():
-    rodando = True  # variável que controla o loop principal do jogo
-    relogio = pygame.time.Clock()  # cria um objeto para controlar o tempo de atualização do jogo
+    rodando = True
+    relogio = pygame.time.Clock()
 
-    raquete_esquerda = Raquete(10, ALTURA // 2 - ALTURA_RAQUETE // 2, LARGURA_RAQUETE, ALTURA_RAQUETE, AZUL)  # cria a raquete esquerda
-    raquete_direita = Raquete(LARGURA - 10 - LARGURA_RAQUETE, ALTURA // 2 - ALTURA_RAQUETE // 2, LARGURA_RAQUETE, ALTURA_RAQUETE, VERMELHO)  # cria a raquete direita
-    bola = Bola(LARGURA // 2, ALTURA // 2, RAIO_BOLA)  # cria a bola
+    raquete_esquerda = Raquete(10, ALTURA // 2 - ALTURA_RAQUETE // 2, LARGURA_RAQUETE, ALTURA_RAQUETE, AZUL)
+    raquete_direita = Raquete(LARGURA - 10 - LARGURA_RAQUETE, ALTURA // 2 - ALTURA_RAQUETE // 2, LARGURA_RAQUETE, ALTURA_RAQUETE, VERMELHO)
+    bola = Bola(LARGURA // 2, ALTURA // 2, RAIO_BOLA)
 
-    pontuacao_esquerda = 0  # inicializa a pontuação do jogador 1
-    pontuacao_direita = 0  # inicializa a pontuação do jogador 2
+    pontuacao_esquerda = 0
+    pontuacao_direita = 0
 
-    jogo_pausado = False  # variável para controlar se o jogo está pausado
-    mensagem_vitoria = None  # mensagem de vitória a ser exibida
-    mensagem_reiniciar = None  # mensagem de reinício a ser exibida
+    jogo_pausado = False
+    mensagem_vitoria = None
+    mensagem_reiniciar = None
+
+    nivel = escolher_nivel(TELA)  # Passa a tela para a função de escolha de nível
+
+    if nivel == "básico":
+        Bola.VELOCIDADE_MAX = 3
+        Raquete.VELOCIDADE = 5
+    elif nivel == "intermediário":
+        Bola.VELOCIDADE_MAX = 7
+        Raquete.VELOCIDADE = 9
+    elif nivel == "avançado":
+        Bola.VELOCIDADE_MAX = 20
+        Raquete.VELOCIDADE = 10
 
     while rodando:
-        relogio.tick(FPS)  # controla a taxa de atualização do jogo
+        relogio.tick(FPS)
 
-        for evento in pygame.event.get():  # loop para capturar eventos do jogo
-            if evento.type == pygame.QUIT:  # evento de fechar a janela do jogo
-                rodando = False  # encerra o loop principal
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                rodando = False
                 break
 
-            if evento.type == pygame.KEYDOWN:  # evento de pressionar uma tecla
-                if evento.key == pygame.K_r and jogo_pausado:  # se a tecla 'R' for pressionada e o jogo estiver pausado
-                    pontuacao_esquerda = 0  # reseta a pontuação do jogador 1
-                    pontuacao_direita = 0  # reseta a pontuação do jogador 2
-                    bola.resetar()  # reseta a posição e a velocidade da bola
-                    raquete_esquerda.resetar()  # reseta a posição da raquete esquerda
-                    raquete_direita.resetar()  # reseta a posição da raquete direita
-                    jogo_pausado = False  # despausa o jogo
-                    mensagem_vitoria = None  # reseta a mensagem de vitória
-                    mensagem_reiniciar = None  # reseta a mensagem de reinício
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r and jogo_pausado:
+                    pontuacao_esquerda = 0
+                    pontuacao_direita = 0
+                    bola.resetar()
+                    raquete_esquerda.resetar()
+                    raquete_direita.resetar()
+                    jogo_pausado = False
+                    mensagem_vitoria = None
+                    mensagem_reiniciar = None
 
-        if not jogo_pausado:  # se o jogo não estiver pausado, atualiza o estado do jogo
-            keys = pygame.key.get_pressed()  # captura as teclas pressionadas
+        if not jogo_pausado:
+            keys = pygame.key.get_pressed()
 
-            # movimentação das raquetes
-            if keys[pygame.K_w] and raquete_esquerda.y - raquete_esquerda.VELOCIDADE >= 0:  # movimenta a raquete esquerda para cima
+            if keys[pygame.K_w] and raquete_esquerda.y - raquete_esquerda.VELOCIDADE >= 0:
                 raquete_esquerda.mover(cima=True)
-            if keys[pygame.K_s] and raquete_esquerda.y + raquete_esquerda.altura + raquete_esquerda.VELOCIDADE <= ALTURA:  # movimenta a raquete esquerda para baixo
+            if keys[pygame.K_s] and raquete_esquerda.y + raquete_esquerda.altura + raquete_esquerda.VELOCIDADE <= ALTURA:
                 raquete_esquerda.mover(cima=False)
-            if keys[pygame.K_UP] and raquete_direita.y - raquete_direita.VELOCIDADE >= 0:  # movimenta a raquete direita para cima
+            if keys[pygame.K_UP] and raquete_direita.y - raquete_direita.VELOCIDADE >= 0:
                 raquete_direita.mover(cima=True)
-            if keys[pygame.K_DOWN] and raquete_direita.y + raquete_direita.altura + raquete_direita.VELOCIDADE <= ALTURA:  # movimenta a raquete direita para baixo
+            if keys[pygame.K_DOWN] and raquete_direita.y + raquete_direita.altura + raquete_direita.VELOCIDADE <= ALTURA:
                 raquete_direita.mover(cima=False)
 
-            bola.mover()  # move a bola
+            bola.mover()
+            tratar_colisao(bola, raquete_esquerda, raquete_direita)
 
-            tratar_colisao(bola, raquete_esquerda, raquete_direita)  # trata as colisões da bola com as raquetes e as bordas da tela
-
-            # atualiza a pontuação e reseta a bola se ela sair da tela
             if bola.x < 0:
-                pontuacao_direita += 1  # incrementa a pontuação do jogador 2
-                bola.resetar()  # reseta a bola
+                pontuacao_direita += 1
+                bola.resetar()
             elif bola.x > LARGURA:
-                pontuacao_esquerda += 1  # incrementa a pontuação do jogador 1
-                bola.resetar()  # reseta a bola
+                pontuacao_esquerda += 1
+                bola.resetar()
 
-            # verifica se algum jogador venceu o jogo
             if pontuacao_esquerda >= PONTUACAO_VITORIA:
                 mensagem_vitoria = "Jogador 1 ganhou!"
                 mensagem_reiniciar = "Press 'R' para recomeçar"
-                jogo_pausado = True  # pausa o jogo
+                jogo_pausado = True
             elif pontuacao_direita >= PONTUACAO_VITORIA:
                 mensagem_vitoria = "Jogador 2 ganhou!"
                 mensagem_reiniciar = "Pressione 'R' para recomeçar"
-                jogo_pausado = True  # pausa o jogo
+                jogo_pausado = True
 
-        desenhar(TELA, [raquete_esquerda, raquete_direita], bola, pontuacao_esquerda, pontuacao_direita, mensagem_reiniciar, mensagem_vitoria)  # desenha os elementos do jogo na tela
+        desenhar(TELA, [raquete_esquerda, raquete_direita], bola, pontuacao_esquerda, pontuacao_direita, mensagem_reiniciar, mensagem_vitoria)
 
-    pygame.quit()  # encerra o pygame
+    pygame.quit()
 
 if __name__ == "__main__":
-    main()  # inicia o jogo
+    main()
