@@ -13,7 +13,6 @@ FPS = 60
 # define cores em RGB
 BRANCO = (255, 255, 255)
 PRETO = (0, 0, 0)
-VERDE = (0, 128, 0)  # cor verde mais escura e sutil para o fundo da mensagem de vitória
 AZUL = (0, 0, 255)
 VERMELHO = (255, 0, 0)
 
@@ -114,7 +113,6 @@ def desenhar(tela, raquetes, bola, pontuacao_esquerda, pontuacao_direita, mensag
         padding = 20  # define o padding desejado
         texto_vitoria, retangulo_vitoria = FONTE_VITORIA.render(mensagem_vitoria, BRANCO)
         fundo_mensagem = pygame.Surface((retangulo_vitoria.width + 2 * padding, retangulo_vitoria.height + 2 * padding))
-        fundo_mensagem.fill(VERDE)  # preenche o fundo da mensagem com a cor verde
         tela.blit(fundo_mensagem, (LARGURA // 2 - (retangulo_vitoria.width + 2 * padding) // 2, ALTURA // 2 - (retangulo_vitoria.height + 2 * padding) // 2 - 50))  # exibe o fundo da mensagem
         tela.blit(texto_vitoria, (LARGURA // 2 - retangulo_vitoria.width // 2, ALTURA // 2 - retangulo_vitoria.height // 2 - 50))  # exibe a mensagem de vitória
 
