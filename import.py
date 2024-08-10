@@ -148,18 +148,28 @@ def tratar_colisao(bola, raquete_esquerda, raquete_direita):
                 bola.velocidade_y = -diferenca_meio / fator_reducao
 
 def escolher_nivel(tela):
-    # configura a fonte para o menu
+    # Configura a fonte para o menu
     FONTE_MENU = pygame.freetype.SysFont("freesansbold", 40)
+    FONTE_TITULO = pygame.freetype.SysFont("freesansbold", 40)
 
     nivel = None
     while nivel is None:
-        tela.fill(PRETO)  # limpa a tela
+        tela.fill(PRETO)  # Limpa a tela
 
-        # desenha o texto do menu
-        texto_menu, retangulo_menu = FONTE_MENU.render("Escolha o Nível: 1 - Básico, 2 - Intermediário, 3 - Avançado", BRANCO)
-        tela.blit(texto_menu, (LARGURA // 2 - retangulo_menu.width // 2, ALTURA // 2 - retangulo_menu.height // 2))
+        # Exibe a mensagem de boas-vindas
+        texto_titulo, retangulo_titulo = FONTE_TITULO.render("Olá, seja bem-vindo(a) ao Pong!", BRANCO)
+        tela.blit(texto_titulo, (LARGURA // 2 - retangulo_titulo.width // 2, ALTURA // 4 - retangulo_titulo.height // 2))
 
-        pygame.display.update()  # atualiza a tela
+        # Desenha o menu de níveis em forma de lista
+        texto_menu1, retangulo_menu1 = FONTE_MENU.render("1 - Básico", BRANCO)
+        texto_menu2, retangulo_menu2 = FONTE_MENU.render("2 - Intermediário", BRANCO)
+        texto_menu3, retangulo_menu3 = FONTE_MENU.render("3 - Avançado", BRANCO)
+
+        tela.blit(texto_menu1, (LARGURA // 2 - retangulo_menu1.width // 2, ALTURA // 2 - retangulo_menu1.height // 2 - 40))
+        tela.blit(texto_menu2, (LARGURA // 2 - retangulo_menu2.width // 2, ALTURA // 2 - retangulo_menu2.height // 2 + 10))
+        tela.blit(texto_menu3, (LARGURA // 2 - retangulo_menu3.width // 2, ALTURA // 2 - retangulo_menu3.height // 2 + 60))
+
+        pygame.display.update()  # Atualiza a tela
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -175,6 +185,7 @@ def escolher_nivel(tela):
                     nivel = "avançado"
 
     return nivel
+
 
 def main():
     rodando = True
